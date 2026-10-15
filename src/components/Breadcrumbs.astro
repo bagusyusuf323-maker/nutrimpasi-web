@@ -1,0 +1,55 @@
+---
+export interface BreadcrumbItem {
+  name: string;
+  url: string;
+}
+
+export interface Props {
+  items: BreadcrumbItem[];
+}
+
+const { items } = Astro.props;
+
+// Schema.org BreadcrumbList
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: items.map((item, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    name: item.name,
+    item: item.url.startsWith('http') ? item.url : `${Astro.site ? Astro.site.toString() : 'https://nutrimpasi.vercel.app'}${item.url}`,
+  })),
+};
+---
+
+<nav aria-label="Breadcrumb" class="py-3 px-4 rounded-2xl bg-brand-secondary/40 text-sm mb-6 inline-flex flex-wrap items-center gap-2">
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  
+  <a href="/" class="text-brand-text/70 hover:text-brand-primary transition-colors flex items-center gap-1 font-medium">
+    <svg class="w-4 h-4 text-brand-primary" fill="currentColor" viewBox="0 0 20 20">
+      <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
+    </svg>
+    <span>Beranda</span>
+  </a>
+
+  {items.map((item, index) => {
+    const isLast = index === items.length - 1;
+    return (
+      <div class="flex items-center gap-2">
+        <svg class="w-3.5 h-3.5 text-brand-text/40 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+        </svg>
+        {isLast ? (
+          <span class="text-brand-primary font-semibold max-w-[200px] sm:max-w-xs md:max-w-md truncate" aria-current="page">
+            {item.name}
+          </span>
+        ) : (
+          <a href={item.url} class="text-brand-text/70 hover:text-brand-primary transition-colors font-medium">
+            {item.name}
+          </a>
+        )}
+      </div>
+    );
+  })}
+</nav>

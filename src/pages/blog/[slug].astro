@@ -1,0 +1,259 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import NotionRenderer from '../../components/NotionRenderer.astro';
+import BlogCard from '../../components/BlogCard.astro';
+import { getDatabase, getPageBlocks } from '../../lib/notion';
+import type { NotionPost } from '../../lib/notion';
+
+// Static Site Generation (SSG) Paths
+export async function getStaticPaths() {
+  const posts = await getDatabase();
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+export interface Props {
+  post: NotionPost;
+}
+
+const { post } = Astro.props;
+
+// Ambil blok Notion untuk halaman ini
+const blocks = await getPageBlocks(post.id, post.slug);
+
+// Ambil artikel terkait (kecuali artikel saat ini)
+const allPosts = await getDatabase();
+const relatedPosts = allPosts.filter((p) => p.slug !== post.slug).slice(0, 3);
+
+// Format Tanggal
+const formattedDate = new Date(post.date).toLocaleDateString('id-ID', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+
+// Breadcrumbs
+const breadcrumbItems = [
+  { name: 'Blog & Panduan', url: '/blog' },
+  { name: post.title, url: `/blog/${post.slug}` },
+];
+
+// Schema.org Article / BlogPosting
+const siteUrl = Astro.site ? Astro.site.toString() : 'https://nutrimpasi.vercel.app';
+const articleUrl = `${siteUrl}/blog/${post.slug}`;
+
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  mainEntityOfPage: {
+    '@type': 'WebPage',
+    '@id': articleUrl,
+  },
+  headline: post.title,
+  description: post.excerpt,
+  image: [post.cover],
+  datePublished: `${post.date}T08:00:00+07:00`,
+  dateModified: `${post.date}T08:00:00+07:00`,
+  author: {
+    '@type': 'Person',
+    name: post.author || 'Tim Ahli NutriMPASI',
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: 'NutriMPASI',
+    logo: {
+      '@type': 'ImageObject',
+      url: `${siteUrl}/favicon.svg`,
+    },
+  },
+};
+---
+
+<Layout
+  title={`${post.title} - NutriMPASI`}
+  description={post.excerpt}
+  image={post.cover}
+  canonicalURL={articleUrl}
+  type="article"
+  publishedTime={`${post.date}T08:00:00+07:00`}
+  author={post.author || 'Tim NutriMPASI'}
+  tags={post.tags.map((t) => t.name)}
+  schema={articleSchema}
+>
+  <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
+    <!-- Breadcrumbs Navigation -->
+    <Breadcrumbs items={breadcrumbItems} />
+
+    <!-- Article Header -->
+    <header class="mb-10 space-y-6">
+      
+      <!-- Tags List -->
+      <div class="flex flex-wrap items-center gap-2">
+        {post.tags.map((tag) => (
+          <a
+            href={`/blog?tag=${encodeURIComponent(tag.name)}`}
+            class="px-3.5 py-1 rounded-full text-xs font-semibold bg-brand-primary/10 text-brand-primary hover:bg-brand-primary hover:text-white transition-colors"
+          >
+            #{tag.name}
+          </a>
+        ))}
+      </div>
+
+      <!-- Main Article Title -->
+      <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold font-heading text-brand-text leading-[1.2]">
+        {post.title}
+      </h1>
+
+      <!-- Meta Info (Author, Date, Read Time) -->
+      <div class="flex flex-wrap items-center gap-4 py-4 border-y border-brand-border/70 text-xs sm:text-sm text-brand-text-muted">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-brand-secondary flex items-center justify-center text-brand-primary font-bold text-xs">
+            👩‍⚕️
+          </div>
+          <span class="font-bold text-brand-text">{post.author || 'Tim Ahli NutriMPASI'}</span>
+        </div>
+
+        <span>•</span>
+
+        <span class="inline-flex items-center gap-1.5">
+          <svg class="w-4 h-4 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+          <time datetime={post.date}>{formattedDate}</time>
+        </span>
+
+        <span>•</span>
+
+        <span class="inline-flex items-center gap-1.5">
+          <svg class="w-4 h-4 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span>{post.readTime || '4 menit baca'}</span>
+        </span>
+      </div>
+
+      <!-- Featured Image Banner -->
+      <div class="relative overflow-hidden rounded-4xl aspect-[16/9] shadow-soft border border-brand-border/80 bg-brand-secondary/30">
+        <img
+          src={post.cover}
+          alt={`Foto cover untuk ${post.title}`}
+          loading="eager"
+          decoding="async"
+          class="w-full h-full object-cover"
+        />
+      </div>
+
+    </header>
+
+    <!-- Excerpt Lead Box -->
+    <div class="p-6 rounded-3xl bg-brand-secondary/40 border border-brand-secondary-dark text-base sm:text-lg text-brand-text leading-relaxed font-medium mb-10">
+      <span class="font-bold text-brand-primary">Ringkasan:</span> {post.excerpt}
+    </div>
+
+    <!-- Main Content rendered from Notion Blocks -->
+    <div class="bg-white p-6 sm:p-10 rounded-4xl border border-brand-border/70 shadow-soft mb-12">
+      <NotionRenderer blocks={blocks} />
+    </div>
+
+    <!-- Share & Social Buttons -->
+    <div class="p-6 rounded-3xl bg-brand-bg border border-brand-border flex flex-col sm:flex-row items-center justify-between gap-4 mb-12">
+      <div class="text-sm font-bold text-brand-text">
+        Bagikan artikel bermanfaat ini ke sesama Mama:
+      </div>
+      <div class="flex items-center gap-3">
+        <a
+          href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`${post.title} - Baca selengkapnya di: ${articleUrl}`)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="px-4 py-2 rounded-full font-bold text-xs bg-[#25D366] text-white hover:opacity-90 transition-opacity flex items-center gap-1.5 shadow-sm"
+        >
+          <span>WhatsApp</span>
+        </a>
+        <a
+          href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(articleUrl)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="px-4 py-2 rounded-full font-bold text-xs bg-[#1DA1F2] text-white hover:opacity-90 transition-opacity flex items-center gap-1.5 shadow-sm"
+        >
+          <span>Twitter / X</span>
+        </a>
+        <button
+          type="button"
+          id="copy-link-btn"
+          class="px-4 py-2 rounded-full font-bold text-xs bg-white text-brand-text border border-brand-border hover:bg-brand-secondary transition-colors"
+        >
+          Salin Tautan
+        </button>
+      </div>
+    </div>
+
+    <!-- In-Article Product CTA [CTA_UTAMA] -->
+    <div class="p-8 sm:p-10 rounded-4xl bg-gradient-to-r from-brand-secondary via-brand-secondary/80 to-brand-secondary text-brand-text border border-brand-accent/40 mb-16 shadow-soft">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="space-y-2 text-center md:text-left">
+          <span class="inline-block px-3 py-1 rounded-full text-xs font-extrabold bg-brand-accent text-brand-text">
+            Rekomendasi Menu Sehat
+          </span>
+          <h3 class="text-2xl font-extrabold font-heading text-brand-text">
+            Pusing Menyiapkan Menu MPASI Setiap Hari?
+          </h3>
+          <p class="text-sm text-brand-text-muted max-w-lg">
+            Serahkan pada NutriMPASI! Menu MPASI siap saji kaya zat besi, higienis, dan tanpa pengawet siap menemani fase makan si kecil.
+          </p>
+        </div>
+        <a
+          href="https://wa.me/6281234567890"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="px-7 py-4 rounded-full font-extrabold text-sm sm:text-base text-brand-text bg-brand-accent hover:bg-[#FFA84D] shadow-warm whitespace-nowrap transition-transform active:scale-95"
+        >
+          Pilih MPASI Sehat untuk Si Kecil
+        </a>
+      </div>
+    </div>
+
+    <!-- Related Posts Section -->
+    {relatedPosts.length > 0 && (
+      <section class="border-t border-brand-border/80 pt-12">
+        <div class="flex items-center justify-between mb-8">
+          <h2 class="text-2xl font-extrabold font-heading text-brand-text">
+            Artikel Terkait Lainnya
+          </h2>
+          <a href="/blog" class="text-xs font-bold text-brand-primary hover:underline">
+            Lihat Semua →
+          </a>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {relatedPosts.map((related) => (
+            <BlogCard post={related} />
+          ))}
+        </div>
+      </section>
+    )}
+
+  </article>
+</Layout>
+
+<script>
+  // Copy Link functionality
+  const copyBtn = document.getElementById('copy-link-btn');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        const originalText = copyBtn.innerText;
+        copyBtn.innerText = 'Tersalin! ✓';
+        copyBtn.classList.add('bg-brand-primary', 'text-white');
+        setTimeout(() => {
+          copyBtn.innerText = originalText;
+          copyBtn.classList.remove('bg-brand-primary', 'text-white');
+        }, 2000);
+      } catch (err) {
+        console.error('Gagal menyalin tautan:', err);
+      }
+    });
+  }
+</script>

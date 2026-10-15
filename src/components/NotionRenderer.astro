@@ -1,0 +1,173 @@
+---
+import type { NotionBlock, NotionRichText } from '../lib/notion';
+
+export interface Props {
+  blocks: NotionBlock[];
+}
+
+const { blocks } = Astro.props;
+
+// Helper untuk merender format teks Notion (bold, italic, link, dll)
+function renderRichText(richTexts: NotionRichText[] = []) {
+  if (!richTexts || richTexts.length === 0) return '';
+
+  return richTexts.map((text) => {
+    let content = text.plain_text;
+    
+    // Escape HTML characters
+    content = content
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    if (text.annotations.bold) {
+      content = `<strong>${content}</strong>`;
+    }
+    if (text.annotations.italic) {
+      content = `<em>${content}</em>`;
+    }
+    if (text.annotations.strikethrough) {
+      content = `<del>${content}</del>`;
+    }
+    if (text.annotations.underline) {
+      content = `<u>${content}</u>`;
+    }
+    if (text.annotations.code) {
+      content = `<code class="px-1.5 py-0.5 rounded-md bg-brand-secondary text-brand-text font-mono text-sm">${content}</code>`;
+    }
+    if (text.href) {
+      content = `<a href="${text.href}" target="_blank" rel="noopener noreferrer" class="text-brand-primary underline hover:text-brand-primary-dark transition-colors font-medium">${content}</a>`;
+    }
+
+    return content;
+  }).join('');
+}
+---
+
+{(!blocks || blocks.length === 0) ? (
+  <div class="py-12 px-4 text-center">
+    <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-brand-primary/10 text-brand-primary mb-4">
+      <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+      </svg>
+    </div>
+    <h3 class="text-xl font-bold font-heading text-brand-text mb-2">Konten Halaman Masih Kosong di Notion</h3>
+    <p class="text-sm sm:text-base text-brand-text-muted max-w-md mx-auto leading-relaxed">
+      Artikel ini sudah berhasil terhubung dengan Notion. Buka halaman ini di Notion dan mulai tuliskan isi konten artikel untuk menampilkannya di sini secara otomatis.
+    </p>
+  </div>
+) : (
+  <div class="prose-notion text-brand-text">
+    {blocks.map((block) => {
+    switch (block.type) {
+      case 'paragraph': {
+        const text = renderRichText(block.paragraph?.rich_text);
+        if (!text) return <div class="h-4" />;
+        return <p set:html={text} class="text-base sm:text-lg text-brand-text/90 leading-relaxed mb-6" />;
+      }
+
+      case 'heading_1': {
+        const text = renderRichText(block.heading_1?.rich_text);
+        return <h2 set:html={text} class="text-2xl sm:text-3xl font-extrabold font-heading text-brand-text mt-10 mb-4" />;
+      }
+
+      case 'heading_2': {
+        const text = renderRichText(block.heading_2?.rich_text);
+        return <h3 set:html={text} class="text-xl sm:text-2xl font-bold font-heading text-brand-text mt-8 mb-3 pb-2 border-b border-brand-border" />;
+      }
+
+      case 'heading_3': {
+        const text = renderRichText(block.heading_3?.rich_text);
+        return <h4 set:html={text} class="text-lg sm:text-xl font-bold font-heading text-brand-text mt-6 mb-2" />;
+      }
+
+      case 'bulleted_list_item': {
+        const text = renderRichText(block.bulleted_list_item?.rich_text);
+        return (
+          <div class="flex items-start gap-3 my-2 text-base sm:text-lg">
+            <span class="w-2.5 h-2.5 rounded-full bg-brand-primary flex-shrink-0 mt-2"></span>
+            <div set:html={text} class="leading-relaxed" />
+          </div>
+        );
+      }
+
+      case 'numbered_list_item': {
+        const text = renderRichText(block.numbered_list_item?.rich_text);
+        return (
+          <div class="flex items-start gap-3 my-2 text-base sm:text-lg">
+            <span class="w-6 h-6 rounded-full bg-brand-secondary text-brand-primary font-bold text-xs flex items-center justify-center flex-shrink-0 mt-1">
+              •
+            </span>
+            <div set:html={text} class="leading-relaxed" />
+          </div>
+        );
+      }
+
+      case 'quote': {
+        const text = renderRichText(block.quote?.rich_text);
+        return (
+          <blockquote class="my-6 p-5 sm:p-6 rounded-2xl bg-brand-secondary/60 border-l-4 border-brand-accent text-brand-text italic text-base sm:text-lg">
+            <div set:html={text} />
+          </blockquote>
+        );
+      }
+
+      case 'callout': {
+        const text = renderRichText(block.callout?.rich_text);
+        const emoji = block.callout?.icon?.emoji || '💡';
+        return (
+          <div class="my-6 p-5 sm:p-6 rounded-3xl bg-brand-primary/10 border border-brand-primary/20 flex items-start gap-4 text-base sm:text-lg text-brand-text">
+            <span class="text-2xl flex-shrink-0 leading-none">{emoji}</span>
+            <div set:html={text} class="leading-relaxed" />
+          </div>
+        );
+      }
+
+      case 'image': {
+        const imageSrc = block.image?.type === 'external' ? block.image.external.url : block.image.file?.url;
+        const caption = renderRichText(block.image?.caption);
+        if (!imageSrc) return null;
+
+        return (
+          <figure class="my-8">
+            <div class="overflow-hidden rounded-3xl shadow-soft border border-brand-border/60">
+              <img
+                src={imageSrc}
+                alt={block.image?.caption?.[0]?.plain_text || 'Ilustrasi panduan MPASI'}
+                loading="lazy"
+                decoding="async"
+                class="w-full h-auto object-cover max-h-[500px]"
+              />
+            </div>
+            {caption && (
+              <figcaption class="text-center text-xs sm:text-sm text-brand-text-muted mt-2.5 font-medium" set:html={caption} />
+            )}
+          </figure>
+        );
+      }
+
+      case 'code': {
+        const codeText = block.code?.rich_text?.[0]?.plain_text || '';
+        const language = block.code?.language || 'text';
+        return (
+          <div class="my-6 rounded-2xl overflow-hidden bg-brand-text text-white">
+            <div class="px-4 py-2 bg-black/20 text-xs font-mono text-brand-secondary/80 flex items-center justify-between">
+              <span>{language}</span>
+            </div>
+            <pre class="p-4 overflow-x-auto text-sm font-mono leading-relaxed">
+              <code>{codeText}</code>
+            </pre>
+          </div>
+        );
+      }
+
+      case 'divider': {
+        return <hr class="my-10 border-t-2 border-dashed border-brand-border" />;
+      }
+
+      default:
+        return null;
+    }
+  })}
+  </div>
+)}

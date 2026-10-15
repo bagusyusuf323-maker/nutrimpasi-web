@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <rect width="64" height="64" rx="20" fill="#4ABFCA"/>
+  <!-- Baby Bowl -->
+  <path d="M14 34C14 43.941 22.059 52 32 52C41.941 52 50 43.941 50 34H14Z" fill="#FFF3D6"/>
+  <!-- Bowl Rim -->
+  <path d="M12 34C12 32.343 13.343 31 15 31H49C50.657 31 52 32.343 52 34C52 35.657 50.657 37 49 37H15C13.343 37 12 35.657 12 34Z" fill="#FFB86B"/>
+  <!-- Sprout of Health -->
+  <path d="M32 30V18M32 18C32 18 30 13 24 14C24 19 28 22 32 22M32 18C32 18 34 13 40 14C40 19 36 22 32 22" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Heart Accent -->
+  <path d="M32 44C32 44 26 39.5 26 36.5C26 34.5 27.5 33 29.5 33C30.7 33 31.6 33.6 32 34.2C32.4 33.6 33.3 33 34.5 33C36.5 33 38 34.5 38 36.5C38 39.5 32 44 32 44Z" fill="#F58F8F"/>
+</svg>

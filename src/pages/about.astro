@@ -1,0 +1,129 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+
+const breadcrumbItems = [
+  { name: 'Tentang Kami', url: '/about' },
+];
+
+const values = [
+  {
+    icon: '❤️',
+    title: 'Cinta & Ketelitian Penuh',
+    desc: 'Kami memperlakukan setiap racikan menu seperti membuat makanan untuk buah hati kami sendiri di rumah.',
+  },
+  {
+    icon: '🔬',
+    title: 'Sains & Rekomendasi Dokter',
+    desc: 'Setiap artikel dan gramasi menu mengacu pada panduan resmi IDAI, WHO, dan literatur gizi klinis pediatri.',
+  },
+  {
+    icon: '🌱',
+    title: '100% Bebas Pengawet & Aditif',
+    desc: 'Hanya menggunakan bahan organik dan segar lokal tanpa kompromi bahan kimia sintetis atau penguat rasa.',
+  },
+  {
+    icon: '🤝',
+    title: 'Dukungan Empatis untuk Orang Tua',
+    desc: 'Menemani proses MPASI tanpa judgment atau rasa bersalah, karena setiap anak dan ibu memiliki ritmenya masing-masing.',
+  },
+];
+---
+
+<Layout
+  title="Tentang NutriMPASI - Misi Membangun Generasi Sehat & Cerdas"
+  description="Ketahui kisah di balik NutriMPASI, media edukasi dan penyedia menu MPASI sehat bernutrisi tinggi untuk bayi Indonesia."
+>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16">
+    <Breadcrumbs items={breadcrumbItems} />
+
+    <!-- Hero Section About -->
+    <div class="text-center max-w-3xl mx-auto space-y-4 mb-16">
+      <span class="inline-block px-4 py-1.5 rounded-full text-xs font-bold bg-brand-primary/10 text-brand-primary">
+        Mengenal NutriMPASI
+      </span>
+      <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold font-heading text-brand-text">
+        Mendampingi Setiap Senyum & Tumbuh Kembang Buah Hati
+      </h1>
+      <p class="text-base sm:text-lg text-brand-text-muted leading-relaxed">
+        Lahir dari keresahan orang tua muda yang bingung menghadapi fase MPASI, NutriMPASI hadir sebagai jembatan ilmu gizi yang mudah dipahami dan menu sehat yang praktis disajikan.
+      </p>
+    </div>
+
+    <!-- Story Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
+      <div class="relative">
+        <div class="rounded-4xl overflow-hidden aspect-[4/3] bg-brand-secondary shadow-soft border border-brand-border">
+          <img
+            src="https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1200&q=80"
+            alt="Ibu dan bayi bahagia saat makan MPASI bernutrisi"
+            loading="lazy"
+            class="w-full h-full object-cover"
+          />
+        </div>
+        <div class="absolute -bottom-6 -right-4 sm:right-6 bg-white p-5 rounded-3xl shadow-soft border border-brand-border max-w-xs">
+          <p class="text-xs font-extrabold text-brand-primary uppercase tracking-wider mb-1">Misi Kami</p>
+          <p class="text-xs text-brand-text leading-snug font-medium">
+            Mencegah stunting dan malnutrisi sejak 1.000 Hari Pertama Kehidupan melalui makanan alami bergizi.
+          </p>
+        </div>
+      </div>
+
+      <div class="space-y-6 text-brand-text/90 leading-relaxed text-base sm:text-lg">
+        <h2 class="text-2xl sm:text-3xl font-extrabold font-heading text-brand-text">
+          Berawal dari Dapur Rumah dan Kasih Sayang Ibu
+        </h2>
+        <p>
+          Memulai MPASI seringkali menjadi momen yang mendebarkan bagi orang tua baru. Drama penolakan makan (GTM), kebingungan memilih kombinasi gizi, hingga kelelahan mempersiapkan makanan di tengah padatnya aktivitas sehari-hari seringkali memicu stres.
+        </p>
+        <p>
+          Oleh karena itu, tim dokter anak, ahli gizi, dan para ibu di NutriMPASI bersatu menciptakan platform edukasi serta solusi menu MPASI siap saji yang higienis, lezat, kaya zat besi, dan tanpa pengawet.
+        </p>
+        <p class="p-4 rounded-2xl bg-brand-secondary/40 border-l-4 border-brand-accent text-sm font-medium text-brand-text">
+          "Setiap sendok MPASI adalah investasi kesehatan, kecerdasan kognitif, dan fondasi imunitas si kecil hingga dewasa kelak."
+        </p>
+      </div>
+    </div>
+
+    <!-- Core Values Section -->
+    <div class="bg-white rounded-4xl p-8 sm:p-12 border border-brand-border/80 shadow-soft mb-20">
+      <div class="text-center max-w-2xl mx-auto mb-12 space-y-3">
+        <h2 class="text-2xl sm:text-3xl font-extrabold font-heading text-brand-text">
+          Nilai Utama yang Kami Pegang Teguh
+        </h2>
+        <p class="text-brand-text-muted text-sm sm:text-base">
+          Prinsip yang menuntun kami dalam setiap racikan resep dan panduan informasi yang kami sajikan.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {values.map((v) => (
+          <div class="p-6 rounded-3xl bg-brand-bg border border-brand-border/60 hover:-translate-y-1 transition-transform">
+            <div class="text-3xl mb-4">{v.icon}</div>
+            <h3 class="text-lg font-bold font-heading text-brand-text mb-2">{v.title}</h3>
+            <p class="text-xs sm:text-sm text-brand-text-muted leading-relaxed">{v.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- CTA Section About -->
+    <div class="text-center rounded-4xl bg-brand-secondary/60 p-10 sm:p-14 border border-brand-secondary-dark">
+      <h2 class="text-2xl sm:text-3xl font-extrabold font-heading text-brand-text mb-4">
+        Ingin Berkonsultasi Seputar MPASI Bayi Anda?
+      </h2>
+      <p class="text-brand-text-muted max-w-xl mx-auto mb-8 text-sm sm:text-base">
+        Tim ahli kami siap membantu Mama menemukan solusi menu yang sesuai dengan usia dan preferensi si kecil.
+      </p>
+      <a
+        href="https://wa.me/6281234567890"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-2 px-8 py-4 rounded-full font-bold text-base text-brand-text bg-brand-accent hover:bg-[#FFA84D] shadow-warm transition-transform active:scale-95"
+      >
+        <span>Pilih MPASI Sehat untuk Si Kecil</span>
+      </a>
+    </div>
+
+  </div>
+</Layout>

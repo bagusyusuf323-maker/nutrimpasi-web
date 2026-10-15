@@ -1,0 +1,6 @@
+# Robots.txt for NutriMPASI
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://nutrimpasi.vercel.app/sitemap-index.xml
